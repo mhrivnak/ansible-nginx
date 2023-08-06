@@ -1,0 +1,43 @@
+- name: Install nginx
+  ansible.builtin.dnf:
+    name: nginx
+    state: latest
+
+- name: ensure letsencrypt TLS settings are present
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf
+    dest: /etc/letsencrypt/options-ssl-nginx.conf
+    mode: '0640'
+    # force downloading every time, in case the contents change. We don't worry
+    # about restarting nginx upon change, because it should be restarted anyway
+    # when certificates rotate, and there should not be a need to update this
+    # file sooner than at next cert rotation.
+    force: true
+
+- name: permit traffic in default zone for http service
+  ansible.posix.firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: permit traffic in default zone for https service
+  ansible.posix.firewalld:
+    service: https
+    permanent: true
+    state: enabled
+    immediate: true
+
+# This enables nginx to connect to a local port, which is required for acting as
+# a reverse proxy.
+- name: set httpd_can_network_connect boolean for reverse proxy
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+
+- name: Enable and start nginx
+  ansible.builtin.service:
+    name: nginx
+    enabled: yes
+    state: started

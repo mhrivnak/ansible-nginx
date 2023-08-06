@@ -1,0 +1,15 @@
+galaxy_info:
+  author: Michael Hrivnak
+  description: Deploys nginx and configures it for use as a reverse proxy on CentOS Stream and compatible distributions.
+  license: GPL-3.0-only
+  min_ansible_version: 2.14.2
+
+  platforms:
+  - name: EL
+    versions:
+    - 9
+
+  galaxy_tags:
+  - nginx
+
+dependencies: []
