@@ -3,6 +3,11 @@
     name: nginx
     state: latest
 
+- name: stat /etc/letsencrypt
+  stat:
+    path: /etc/letsencrypt
+  register: etc_letsencrypt
+
 - name: ensure letsencrypt TLS settings are present
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf
@@ -13,6 +18,7 @@
     # when certificates rotate, and there should not be a need to update this
     # file sooner than at next cert rotation.
     force: true
+  when: etc_letsencrypt.stat.exists
 
 - name: permit traffic in default zone for http service
   ansible.posix.firewalld:
